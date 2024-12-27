@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import type { ContentItem } from '../types';
 import { SheetsService } from '../services/sheetsService';
 import { SSEService } from '../services/sseService';
 

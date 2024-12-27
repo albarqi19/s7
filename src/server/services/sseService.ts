@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { ContentItem } from '../types';
+import type { ContentItem } from '../../types';
 import { Logger } from './logger';
 
 export class SSEService {
