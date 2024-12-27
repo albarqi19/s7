@@ -13,7 +13,8 @@ export const displayController = {
         'Access-Control-Allow-Origin': '*'
       });
 
-      SSEService.getInstance().addClient(res);
+      const sseService = SSEService.getInstance();
+      sseService.addClient(res);
       
       // Send initial heartbeat
       res.write('data: {"type":"heartbeat"}\n\n');
@@ -25,7 +26,7 @@ export const displayController = {
 
       req.on('close', () => {
         clearInterval(heartbeat);
-        SSEService.getInstance().removeClient(res);
+        sseService.removeClient(res);
       });
     } catch (error: any) {
       console.error('SSE setup error:', error);
@@ -36,7 +37,8 @@ export const displayController = {
   async updateDisplay(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.body;
-      const contents = await SheetsService.getInstance().getContents();
+      const service = SheetsService.getInstance();
+      const contents: ContentItem[] = await service.getContents();
       const content = contents.find(item => item.id === id);
       
       if (!content) {
@@ -55,7 +57,7 @@ export const displayController = {
   async getCurrentDisplay(_req: Request, res: Response): Promise<void> {
     try {
       const service = SheetsService.getInstance();
-      const contents = await service.getContents();
+      const contents: ContentItem[] = await service.getContents();
       res.json(contents[0] || null);
     } catch (error: any) {
       res.status(500).json({ 

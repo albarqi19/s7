@@ -1,3 +1,4 @@
+import { Request, Response } from 'express';
 import { sheetsController } from '../controllers/sheetsController';
 
 export const config = {
@@ -6,7 +7,7 @@ export const config = {
   },
 };
 
-export default async function handler(req, res) {
+export default async function handler(req: Request, res: Response) {
   if (req.method === 'GET') {
     return sheetsController.getContents(req, res);
   }
