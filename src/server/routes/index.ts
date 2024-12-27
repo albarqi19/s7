@@ -1,13 +1,10 @@
-import { Express } from 'express';
-import { sheetsController } from '../controllers/sheetsController';
-import { displayController } from '../controllers/displayController';
+import { Router } from 'express';
+import contentsRoutes from './contents.routes';
+import displayRoutes from './display.routes';
 
-export function setupRoutes(app: Express) {
-  // Google Sheets routes
-  app.get('/api/contents', sheetsController.getContents);
-  
-  // Display routes
-  app.get('/api/display', displayController.getCurrentDisplay);
-  app.post('/api/display/update', displayController.updateDisplay);
-  app.get('/api/display/stream', displayController.setupSSE);
-}
+const router = Router();
+
+router.use('/contents', contentsRoutes);
+router.use('/display', displayRoutes);
+
+export default router;
