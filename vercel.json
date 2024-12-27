@@ -7,6 +7,10 @@
       "config": {
         "distDir": "dist"
       }
+    },
+    {
+      "src": "src/server/**/*.ts",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
@@ -19,8 +23,8 @@
       "dest": "/assets/$1"
     },
     {
-      "src": "^/api/.*",
-      "dest": "/api/$1"
+      "src": "/api/(.*)",
+      "dest": "/src/server/api/$1.ts"
     },
     {
       "handle": "filesystem"
