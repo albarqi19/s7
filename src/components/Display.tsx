@@ -5,11 +5,23 @@ const Display: React.FC = () => {
   const [content, setContent] = useState<ContentItem | null>(null);
 
   useEffect(() => {
-    const eventSource = new EventSource('/api/display-updates');
+    // Fetch initial content
+    fetch('/api/display')
+      .then(res => res.json())
+      .then(data => setContent(data))
+      .catch(console.error);
+
+    // Setup SSE for updates
+    const eventSource = new EventSource('/api/display/stream');
     
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
       setContent(data);
+    };
+
+    eventSource.onerror = (error) => {
+      console.error('SSE Error:', error);
+      eventSource.close();
     };
 
     return () => eventSource.close();
@@ -18,7 +30,7 @@ const Display: React.FC = () => {
   if (!content) {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-black">
-        <p className="text-white text-2xl">Waiting for content...</p>
+        <p className="text-white text-2xl">جاري تحميل المحتوى...</p>
       </div>
     );
   }
@@ -36,6 +48,7 @@ const Display: React.FC = () => {
           src={content.content}
           className="w-full h-full border-0"
           title={content.name}
+          allowFullScreen
         />
       )}
     </div>
