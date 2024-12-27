@@ -7,6 +7,7 @@ export function setupRoutes(app: Express) {
   app.get('/api/contents', sheetsController.getContents);
   
   // Display routes
-  app.get('/api/display-updates', displayController.setupSSE);
-  app.post('/api/display', displayController.updateDisplay);
+  app.get('/api/display', displayController.getCurrentDisplay);
+  app.post('/api/display/update', displayController.updateDisplay);
+  app.get('/api/display/stream', displayController.setupSSE);
 }
