@@ -3,7 +3,7 @@ import { SheetsService } from '../services/sheetsService';
 import { Logger } from '../services/logger';
 
 export const sheetsController = {
-  async getContents(req: Request, res: Response) {
+  async getContents(_req: Request, res: Response): Promise<void> {
     try {
       Logger.info('Fetching contents from Google Sheets...');
       const service = SheetsService.getInstance();

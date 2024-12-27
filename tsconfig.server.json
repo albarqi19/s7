@@ -12,11 +12,17 @@
     "emitDeclarationOnly": false,
     "sourceMap": true,
     "declaration": true,
-    "composite": true
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@types/*": ["src/types/*"]
+    }
   },
   "include": [
     "src/server/**/*",
-    "src/config/**/*"
+    "src/config/**/*",
+    "src/types/**/*"
   ],
   "exclude": ["node_modules"],
   "ts-node": {

@@ -1,19 +1,17 @@
 import { Request, Response } from 'express';
 import { SheetsService } from '../services/sheetsService';
-import { Logger } from '../services/logger';
 
-export async function getContents(req: Request, res: Response) {
-  try {
-    Logger.info('Fetching contents');
-    const contents = await SheetsService.getInstance().getContents();
-    Logger.info('Contents fetched successfully');
-    res.json(contents);
-  } catch (error) {
-    Logger.error('Error fetching contents:', error);
-    res.status(500).json({
-      error: true,
-      message: 'Failed to fetch contents',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    });
+export const contentsController = {
+  async getContents(_req: Request, res: Response): Promise<void> {
+    try {
+      const service = SheetsService.getInstance();
+      const contents = await service.getContents();
+      res.json(contents);
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: 'Failed to fetch contents',
+        details: error.message
+      });
+    }
   }
-}
+};

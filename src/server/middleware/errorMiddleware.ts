@@ -1,18 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { Logger } from '../services/logger';
 
-export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
-  Logger.error('Server error:', err);
-  
-  // Don't expose internal errors to clients in production
-  const message = process.env.NODE_ENV === 'development' 
-    ? err.message 
-    : 'Internal server error';
-
+export const errorMiddleware = (err: Error, _req: Request, res: Response, _next: NextFunction): void => {
+  console.error('Error:', err);
   res.status(500).json({
-    error: true,
-    message,
-    path: req.path,
-    timestamp: new Date().toISOString()
+    error: 'Internal Server Error',
+    message: err.message
   });
-}
+};
