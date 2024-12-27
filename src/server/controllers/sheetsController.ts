@@ -13,7 +13,7 @@ export const sheetsController = {
       Logger.info('Contents fetched successfully:', contents);
       
       res.json(contents);
-    } catch (error) {
+    } catch (error: any) {
       Logger.error('Error in sheetsController.getContents:', error);
       res.status(500).json({ 
         error: 'Failed to fetch contents',
