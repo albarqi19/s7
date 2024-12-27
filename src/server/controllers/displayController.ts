@@ -5,16 +5,27 @@ import { SSEService } from '../services/sseService';
 export const displayController = {
   async setupSSE(req: Request, res: Response): Promise<void> {
     try {
-      SSEService.getInstance().addClient(res);
-      req.on('close', () => SSEService.getInstance().removeClient(res));
-      
-      // Keep the connection alive
       res.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*'
       });
-      res.write('\n');
+
+      SSEService.getInstance().addClient(res);
+      
+      // Send initial heartbeat
+      res.write('data: {"type":"heartbeat"}\n\n');
+      
+      // Keep connection alive with heartbeat
+      const heartbeat = setInterval(() => {
+        res.write('data: {"type":"heartbeat"}\n\n');
+      }, 30000);
+
+      req.on('close', () => {
+        clearInterval(heartbeat);
+        SSEService.getInstance().removeClient(res);
+      });
     } catch (error: any) {
       console.error('SSE setup error:', error);
       res.status(500).json({ error: error.message });

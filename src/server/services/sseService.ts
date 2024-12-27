@@ -1,43 +1,47 @@
 import { Response } from 'express';
-import type { ContentItem } from '../../types';
+import { ContentItem } from '../types';
+import { Logger } from './logger';
 
 export class SSEService {
   private static instance: SSEService;
   private clients: Set<Response>;
-  private currentContent: ContentItem | null;
 
   private constructor() {
     this.clients = new Set();
-    this.currentContent = null;
   }
 
-  static getInstance(): SSEService {
-    if (!this.instance) {
-      this.instance = new SSEService();
+  public static getInstance(): SSEService {
+    if (!SSEService.instance) {
+      SSEService.instance = new SSEService();
     }
-    return this.instance;
+    return SSEService.instance;
   }
 
-  addClient(res: Response): void {
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
+  public addClient(client: Response): void {
+    Logger.info('New SSE client connected');
+    client.setHeader('Content-Type', 'text/event-stream');
+    client.setHeader('Cache-Control', 'no-cache');
+    client.setHeader('Connection', 'keep-alive');
     
-    this.clients.add(res);
-
-    if (this.currentContent) {
-      res.write(`data: ${JSON.stringify(this.currentContent)}\n\n`);
-    }
+    this.clients.add(client);
   }
 
-  removeClient(res: Response): void {
-    this.clients.delete(res);
+  public removeClient(client: Response): void {
+    Logger.info('SSE client disconnected');
+    this.clients.delete(client);
   }
 
-  broadcast(content: ContentItem): void {
-    this.currentContent = content;
+  public broadcast(content: ContentItem): void {
+    Logger.info(`Broadcasting content update to ${this.clients.size} clients`);
+    const data = JSON.stringify(content);
+    
     this.clients.forEach(client => {
-      client.write(`data: ${JSON.stringify(content)}\n\n`);
+      try {
+        client.write(`data: ${data}\n\n`);
+      } catch (error) {
+        Logger.error('Error sending SSE message:', error);
+        this.removeClient(client);
+      }
     });
   }
 }
