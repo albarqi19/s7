@@ -9,7 +9,7 @@
     "dev:server": "npx tsx src/server/index.ts",
     "build": "tsc && vite build",
     "build:server": "tsc -p tsconfig.server.json",
-    "vercel-build": "npm run build:server && tsc --build tsconfig.app.json tsconfig.node.json && vite build",
+    "vercel-build": "tsc -p tsconfig.server.json && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "node dist/server/index.js"

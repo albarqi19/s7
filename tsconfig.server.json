@@ -7,9 +7,15 @@
     "jsx": "react",
     "esModuleInterop": true,
     "target": "ES2020",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "allowImportingTsExtensions": false,
+    "emitDeclarationOnly": false,
+    "sourceMap": true,
+    "declaration": true,
+    "composite": true
   },
   "include": ["src/server/**/*"],
+  "exclude": ["node_modules"],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"
