@@ -1,47 +1,43 @@
 import { Response } from 'express';
 import type { ContentItem } from '../../types';
-import { Logger } from './logger';
 
 export class SSEService {
   private static instance: SSEService;
   private clients: Set<Response>;
+  private currentContent: ContentItem | null;
 
   private constructor() {
     this.clients = new Set();
+    this.currentContent = null;
   }
 
-  public static getInstance(): SSEService {
-    if (!SSEService.instance) {
-      SSEService.instance = new SSEService();
+  static getInstance(): SSEService {
+    if (!this.instance) {
+      this.instance = new SSEService();
     }
-    return SSEService.instance;
+    return this.instance;
   }
 
-  public addClient(client: Response): void {
-    Logger.info('New SSE client connected');
-    client.setHeader('Content-Type', 'text/event-stream');
-    client.setHeader('Cache-Control', 'no-cache');
-    client.setHeader('Connection', 'keep-alive');
+  addClient(res: Response): void {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
     
-    this.clients.add(client);
+    this.clients.add(res);
+
+    if (this.currentContent) {
+      res.write(`data: ${JSON.stringify(this.currentContent)}\n\n`);
+    }
   }
 
-  public removeClient(client: Response): void {
-    Logger.info('SSE client disconnected');
-    this.clients.delete(client);
+  removeClient(res: Response): void {
+    this.clients.delete(res);
   }
 
-  public broadcast(content: ContentItem): void {
-    Logger.info(`Broadcasting content update to ${this.clients.size} clients`);
-    const data = JSON.stringify(content);
-    
+  broadcast(content: ContentItem): void {
+    this.currentContent = content;
     this.clients.forEach(client => {
-      try {
-        client.write(`data: ${data}\n\n`);
-      } catch (error) {
-        Logger.error('Error sending SSE message:', error);
-        this.removeClient(client);
-      }
+      client.write(`data: ${JSON.stringify(content)}\n\n`);
     });
   }
 }

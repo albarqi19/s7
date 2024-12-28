@@ -1,15 +1,22 @@
 import { google } from 'googleapis';
-import { getAuthClient } from './googleAuth';
+import { createGoogleAuth } from './googleAuth';
 import { GOOGLE_SHEETS_CONFIG } from '../../config/google-sheets';
 import type { ContentItem } from '../../types';
 import { Logger } from './logger';
 
 export class SheetsService {
   private static instance: SheetsService;
-  private sheets: any;
+  private sheets;
 
   private constructor() {
-    this.initializeSheets();
+    try {
+      const auth = createGoogleAuth();
+      this.sheets = google.sheets({ version: 'v4', auth });
+      Logger.info('Google Sheets service initialized');
+    } catch (error) {
+      Logger.error('Failed to initialize Google Sheets service', error);
+      throw error;
+    }
   }
 
   public static getInstance(): SheetsService {
@@ -19,23 +26,8 @@ export class SheetsService {
     return SheetsService.instance;
   }
 
-  private async initializeSheets() {
-    try {
-      const auth = await getAuthClient();
-      this.sheets = google.sheets({ version: 'v4', auth });
-      Logger.info('Google Sheets API initialized successfully');
-    } catch (error: any) {
-      Logger.error('Error initializing Google Sheets API:', error);
-      throw new Error(`Failed to initialize Google Sheets: ${error.message}`);
-    }
-  }
-
   async getContents(): Promise<ContentItem[]> {
     try {
-      if (!this.sheets) {
-        await this.initializeSheets();
-      }
-
       Logger.info('Fetching sheet data...');
       Logger.debug('Using config:', {
         spreadsheetId: GOOGLE_SHEETS_CONFIG.spreadsheetId,
@@ -63,9 +55,9 @@ export class SheetsService {
       const contents = this.transformSheetData(response.data.values);
       Logger.debug('Transformed contents', contents);
       return contents;
-    } catch (error: any) {
-      Logger.error('Error fetching data from Google Sheets:', error);
-      throw new Error(`Failed to fetch contents: ${error.message}`);
+    } catch (error) {
+      Logger.error('Failed to fetch sheet data', error);
+      throw new Error(`Failed to fetch sheet data: ${error.message}`);
     }
   }
 
@@ -83,7 +75,7 @@ export class SheetsService {
         Logger.debug(`Transformed row ${index + 1}`, item);
         return item;
       });
-    } catch (error: any) {
+    } catch (error) {
       Logger.error('Error transforming sheet data', error);
       throw new Error(`Failed to transform sheet data: ${error.message}`);
     }

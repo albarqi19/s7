@@ -1,10 +1,9 @@
 import { Router } from 'express';
-import { displayController } from '../controllers/displayController';
+import { setupSSE, updateDisplay } from '../controllers/displayController';
 
 const router = Router();
 
-router.get('/stream', displayController.setupSSE);
-router.get('/', displayController.getCurrentDisplay);
-router.post('/update', displayController.updateDisplay);
+router.get('/display-updates', setupSSE);
+router.post('/display', updateDisplay);
 
 export default router;
